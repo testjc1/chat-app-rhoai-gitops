@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:  
+    tad.gitops.set/image: ".spec.template.spec.containers[0].image"
+    tad.gitops.get/image: ".spec.template.spec.containers[0].image"
+    tad.gitops.set/replicas: ".spec.replicas"
+    tad.gitops.get/replicas: ".spec.replicas" 
+  labels: 
+    app.kubernetes.io/instance: chat-app-rhoai
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name:  chat-app-rhoai
+    app.kubernetes.io/part-of: chat-app-rhoai  
+  name: chat-app-rhoai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance:  chat-app-rhoai 
+  template:
+    metadata: 
+      labels:
+        app.kubernetes.io/instance:  chat-app-rhoai
+    spec:
+      containers:
+      - env:
+        - name: MODEL_ENDPOINT
+          value: http://chat-app-rhoai-model-server:8001
+        - name: MODEL_NAME
+          value: "instructlab/granite-7b-lab"
+        image:  quay.io/redhat-ai-dev/ai-template-bootstrap-app:latest
+        name: app-inference
+        ports:
+        - containerPort: 8501
+        securityContext:
+          runAsNonRoot: true
